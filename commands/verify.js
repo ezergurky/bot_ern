@@ -1,6 +1,6 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } from 'discord.js';
 
-module.exports = {
+export default {
   data: new SlashCommandBuilder()
     .setName('verify')
     .setDescription('Membuat pesan verifikasi dengan reaksi.')
@@ -16,7 +16,10 @@ module.exports = {
       )
       .setColor(0x2F3136)
       .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
-      .setFooter({ text: 'Verification System  • Ern Store', iconURL: interaction.client.user.displayAvatarURL() })
+      .setFooter({
+        text: 'Verification System  • Ern Store',
+        iconURL: interaction.client.user.displayAvatarURL()
+      })
       .setTimestamp();
 
     await interaction.reply({ embeds: [verifyEmbed] });
@@ -57,5 +60,5 @@ module.exports = {
 
     client.on('messageReactionAdd', addListener);
     client.on('messageReactionRemove', removeListener);
-  },
+  }
 };

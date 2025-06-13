@@ -1,13 +1,33 @@
-const cron = require('node-cron');
-const { EmbedBuilder } = require('discord.js');
+import cron from 'node-cron';
+import pkg from 'discord.js';
+const { EmbedBuilder } = pkg;
 
-module.exports = (client) => {
+export default (client) => {
   const CHANNEL_ID = process.env.STATUS_ID;
 
-  cron.schedule('0 9 * * *', async () => {
-    const channel = await client.channels.fetch(CHANNEL_ID);
-    if (!channel) return;
+  if (!CHANNEL_ID) {
+    console.warn('⚠️ Environment variable STATUS_ID belum di-set!');
+    return;
+  }
 
+  const sendEmbedMessage = async (embed, mentionEveryone = false) => {
+    try {
+      const channel = await client.channels.fetch(CHANNEL_ID);
+      if (!channel) {
+        console.warn('⚠️ Channel dengan ID STATUS_ID tidak ditemukan!');
+        return;
+      }
+      await channel.send({
+        content: mentionEveryone ? '@everyone' : undefined,
+        embeds: [embed],
+        allowedMentions: mentionEveryone ? { parse: ['everyone'] } : {}
+      });
+    } catch (error) {
+      console.error('Gagal mengirim pesan ke channel:', error);
+    }
+  };
+
+  cron.schedule('0 9 * * *', async () => {
     const embed = new EmbedBuilder()
       .setTitle('🛍️ Ern Store // Open')
       .setDescription('Selamat datang di Ern Store!\nKami telah resmi buka hari ini. Temukan berbagai produk menarik berikut ini:')
@@ -72,27 +92,20 @@ module.exports = (client) => {
       .setColor(0x00ff99)
       .setTimestamp();
 
-    await channel.send({
-      content: '@everyone',
-      embeds: [embed],
-      allowedMentions: { parse: ['everyone'] }
-    });
+    await sendEmbedMessage(embed, true);
+  }, {
+    timezone: 'Asia/Jakarta'
   });
 
   cron.schedule('0 22 * * *', async () => {
-    const channel = await client.channels.fetch(CHANNEL_ID);
-    if (!channel) return;
-
     const embed = new EmbedBuilder()
       .setTitle('🚪 Ern Store // Closed')
       .setDescription('Terima kasih telah berkunjung!\nStore telah ditutup untuk hari ini. Sampai jumpa besok 👋')
       .setColor(0xff0000)
       .setTimestamp();
 
-    await channel.send({
-      content: '@everyone',
-      embeds: [embed],
-      allowedMentions: { parse: ['everyone'] }
-    });
+    await sendEmbedMessage(embed, true);
+  }, {
+    timezone: 'Asia/Jakarta'
   });
 };
